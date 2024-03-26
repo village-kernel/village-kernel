@@ -38,7 +38,7 @@ bool BinLoader::Load(const char* filename)
 	if (!LoadBin()) return false;
 
 	//Output debug info
-	kernel->debug->Output(Debug::_Lv2, "%s load done", filename);
+	kernel->debug.Output(Debug::_Lv2, "%s load done", filename);
 	return true;
 }
 
@@ -57,7 +57,7 @@ bool BinLoader::LoadBin()
 		if (bin.load && (file.Read((char*)bin.load, size) == size))
 		{
 			bin.exec = bin.load + *((uint32_t*)bin.load);
-			kernel->debug->Output(Debug::_Lv1, "%s bin file load successful", filename);
+			kernel->debug.Output(Debug::_Lv1, "%s bin file load successful", filename);
 			file.Close();
 			return true;
 		}
@@ -65,7 +65,7 @@ bool BinLoader::LoadBin()
 		file.Close();
 	}
 
-	kernel->debug->Error("%s bin file load failed", filename);
+	kernel->debug.Error("%s bin file load failed", filename);
 	return false;
 }
 
@@ -81,7 +81,7 @@ bool BinLoader::Execute(int argc, char* argv[])
 		((Entry)bin.exec)(argc, argv);
 		return true;
 	}
-	kernel->debug->Error("%s execute failed!", filename);
+	kernel->debug.Error("%s execute failed!", filename);
 	return false;
 }
 

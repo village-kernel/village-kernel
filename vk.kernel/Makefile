@@ -17,11 +17,12 @@ libs-$(CONFIG_KERNEL)                       += kernel
 inc-y                                       += vk.kernel/core/if
 inc-y                                       += vk.kernel/core/inc
 
-src-y                                       += vk.kernel
 src-y                                       += vk.kernel/core/src
 
 inc-$(CONFIG_X86)                           += vk.kernel/arch/x86/bios/inc
 inc-$(CONFIG_CORTEX_M)                      += vk.kernel/arch/arm/cortex-m/inc
+inc-$(CONFIG_STM32F4xx)                     += vk.kernel/arch/arm/cortex-m/inc/stm32f4xx
+inc-$(CONFIG_STM32H7xx)                     += vk.kernel/arch/arm/cortex-m/inc/stm32h7xx
 
 src-$(CONFIG_X86)                           += vk.kernel/arch/x86/bios/src
 src-$(CONFIG_CORTEX_M)                      += vk.kernel/arch/arm/cortex-m/src
@@ -50,9 +51,9 @@ src-$(CONFIG_SYNC)                          += vk.kernel/utilities/sync/src
 ######################################
 # objects
 ######################################
-objs-y                                      += Start.o
-objs-y                                      += Kernel.o
+objs-y                                      += Village.o
 objs-y                                      += Debug.o
+objs-y                                      += Symbol.o
 objs-y                                      += Feature.o
 objs-y                                      += Device.o
 objs-y                                      += Memory.o
@@ -67,7 +68,6 @@ objs-y                                      += System.o
 objs-$(CONFIG_INPUT)                        += Input.o
 objs-$(CONFIG_LOADER)                       += Loader.o
 objs-$(CONFIG_WORKQUEUE)                    += WorkQueue.o
-objs-$(CONFIG_ENVIRONMENT)                  += Symbol.o
 
 objs-$(CONFIG_FILESYSTEM)                   += FileSystem.o
 objs-$(CONFIG_FATFS)                        += FatDiskio.o
@@ -77,6 +77,7 @@ objs-$(CONFIG_FATFS)                        += FatSystem.o
 objs-$(CONFIG_FATFS)                        += FatVolume.o
 
 objs-kernel-$(CONFIG_DIRSTREAM)             += DirStream.o
+objs-kernel-$(CONFIG_DRVSTREAM)             += DrvStream.o
 objs-kernel-$(CONFIG_FILESTREAM)            += FileStream.o
 objs-kernel-$(CONFIG_FILESYSOPT)            += FileSysOpt.o
 

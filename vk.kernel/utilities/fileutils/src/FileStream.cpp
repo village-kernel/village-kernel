@@ -13,13 +13,13 @@ FileStream::FileStream(const char* name, int mode)
 	:fd(-1),
 	opts(NULL)
 {
-	filesys = (FileSystem*)kernel->feature->GetComponent("fileSystem");
+	filesys = (FileSystem*)kernel->feature.GetModule("fileSystem");
 	if (NULL == filesys)
 	{
-		kernel->debug->Error("file system feature not support");
+		kernel->debug.Error("file system feature not support");
 		return;
 	}
-	if (NULL != name) fd = Open(name, mode);
+	if (NULL != name) Open(name, mode);
 }
 
 
@@ -117,7 +117,6 @@ int FileStream::Size()
 
 
 /// @brief FileStream close
-/// @return 
 void FileStream::Close()
 {
 	if (NULL != opts)

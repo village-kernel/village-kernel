@@ -10,16 +10,26 @@
 #include "Kernel.h"
 
 
-/// @brief ConcreteSystem
-class ConcreteSystem : public System, public Class
+/// @brief System
+class ConcreteSystem : public System
 {
 private:
+	///Static constants
+	static const uint32_t microsInSec = 1000000;
+	static const uint32_t microsInMilli = 1000;
+
 	//Members
 	uint32_t sysTicks;
-	
+	uint32_t cyclesInMicro;
+
 	//Methods
-	void SysTickHandler();
-	void ConfigureClock();
+	void ConfigurePower();
+	void ConfigCoreDebug();
+	void ConfigSysTick();
+	void ConfigureMPU();
+	void ConfigurePower();
+	void ConfigureForHsi();
+	void ConfigureForXtal();
 public:
 	//Methods
 	ConcreteSystem();
@@ -28,6 +38,7 @@ public:
 	void Exit();
 	void SysTickCounter();
 	uint32_t GetSysClkCounts();
+	void DelayUs(uint32_t micros);
 	void DelayMs(uint32_t millis);
 	void EnableIRQ();
 	void DisableIRQ();

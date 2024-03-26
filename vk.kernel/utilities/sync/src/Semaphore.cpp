@@ -28,7 +28,7 @@ Semaphore::~Semaphore()
 void Semaphore::Down()
 {
 	if (counter >= 0) counter--; 
-	while(0 > counter) { kernel->thread->Sleep(ticks); }
+	while(0 > counter) { kernel->thread.Sleep(ticks); }
 }
 
 

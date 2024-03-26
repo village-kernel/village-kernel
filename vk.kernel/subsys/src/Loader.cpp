@@ -41,7 +41,7 @@ public:
 		Loading(_Load_Mod, "/modules/_load_.rc");
 
 		//Create task
-		kernel->thread->CreateTask(this->GetName(), (Method)&ConcreteLoader::Execute, this);
+		kernel->thread.CreateTask(this->GetName(), (Method)&ConcreteLoader::Execute, this);
 	}
 
 
@@ -95,5 +95,5 @@ public:
 };
 
 
-///Register component
-REGISTER_COMPONENT(ConcreteLoader, ComponentID::_loader, loader);
+///Register module
+REGISTER_MODULE(new ConcreteLoader(), ModuleID::_serivce, loader);

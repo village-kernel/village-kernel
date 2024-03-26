@@ -82,7 +82,7 @@ private:
 	bool ConfigureMouse()
 	{
 		//Disable irq
-		kernel->system->DisableIRQ();
+		kernel->system.DisableIRQ();
 
 		//Read config
 		ps2.WriteCmd(PS2_CMD_READ_BYTE_0);
@@ -146,7 +146,7 @@ private:
 		ack = MouseWriteData(PS2_MOUSE_CMD_ENA_DATA_REPORTING);
 
 		//Enable irq
-		kernel->system->EnableIRQ();
+		kernel->system.EnableIRQ();
 
 		return (0xfa == ack);
 	}
@@ -239,27 +239,22 @@ public:
 	/// @brief Mouse open
 	bool Open()
 	{
+		//Get the interrupt module
+		interrupt = (Interrupt*)&kernel->interrupt;
+
 		//Get the input module
-		input = (Input*)kernel->feature->GetComponent("input");
+		input = (Input*)kernel->feature.GetModule("input");
 		if (NULL == input)
 		{
-			kernel->debug->Error("input feature not support");
-			return false;
-		}
-
-		//Get the interrupt module
-		interrupt = (Interrupt*)kernel->feature->GetComponent("interrupt");
-		if (NULL == interrupt)
-		{
-			kernel->debug->Error("interrupt feature not support");
+			kernel->debug.Error("input feature not support");
 			return false;
 		}
 
 		//Get the work queue module
-		workQueue = (WorkQueue*)kernel->feature->GetComponent("workQueue");
+		workQueue = (WorkQueue*)kernel->feature.GetModule("workQueue");
 		if (NULL == workQueue)
 		{
-			kernel->debug->Error("work queue feature not support");
+			kernel->debug.Error("work queue feature not support");
 			return false;
 		}
 
@@ -286,4 +281,4 @@ public:
 
 
 //Register driver
-REGISTER_DRIVER(Mouse, DriverID::_miscdev + 1, ps2mouse);
+REGISTER_DRIVER(new Mouse(), DriverID::_character, ps2mouse);

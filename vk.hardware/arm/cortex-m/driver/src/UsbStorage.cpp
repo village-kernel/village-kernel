@@ -187,4 +187,4 @@ void UsbStorage::Unmount()
 
 
 ///Register driver
-REGISTER_DRIVER(UsbStorage, DriverID::_usbdev + 0, usbStorage);
+REGISTER_DRIVER(new UsbStorage(), DriverID::_miscellaneous, usbStorage);

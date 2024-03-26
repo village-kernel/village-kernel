@@ -139,4 +139,4 @@ public:
 
 
 ///Register driver
-REGISTER_DRIVER(SerialPort, DriverID::_serial + 0, serial0);
+REGISTER_DRIVER(new SerialPort(), DriverID::_character, serial0);

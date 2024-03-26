@@ -12,14 +12,14 @@
 
 
 /// @brief Module
-class Component : public Base, public Class
+class Module : public Base, public Class
 {
 public:
 	//Constructor
-	Component() { }
+	Module() { }
 
 	//Destructor
-	virtual ~Component() { }
+	virtual ~Module() { }
 
 	//Methods
 	virtual void Setup() = 0;

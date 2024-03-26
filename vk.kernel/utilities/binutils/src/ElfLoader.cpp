@@ -44,7 +44,7 @@ bool ElfLoader::Load(const char* filename)
 	if (!SharedObjs())  return false;
 	if (!RelEntries())  return false;
 	
-	kernel->debug->Output(Debug::_Lv2, "%s load done", filename);
+	kernel->debug.Output(Debug::_Lv2, "%s load done", filename);
 	return true;
 }
 
@@ -63,7 +63,7 @@ bool ElfLoader::LoadElf()
 
 		if (elf.load && (file.Read((char*)elf.load, size) == size))
 		{
-			kernel->debug->Output(Debug::_Lv1, "%s elf file load successful", filename);
+			kernel->debug.Output(Debug::_Lv1, "%s elf file load successful", filename);
 			file.Close();
 			return true;
 		}
@@ -71,7 +71,7 @@ bool ElfLoader::LoadElf()
 		file.Close();
 	}
 
-	kernel->debug->Error("%s elf file load failed", filename);
+	kernel->debug.Error("%s elf file load failed", filename);
 	return false;
 }
 
@@ -239,7 +239,7 @@ bool ElfLoader::PreParser()
 	if ((elf.header->type    != _ELF_Type_Dyn) &&
 		(elf.header->type    != _ELF_Type_Exec))
 	{
-		kernel->debug->Error("%s is not executable", filename);
+		kernel->debug.Error("%s is not executable", filename);
 		return false;
 	}
 
@@ -274,7 +274,7 @@ bool ElfLoader::PreParser()
 		}
 	}
 
-	kernel->debug->Output(Debug::_Lv1, "%s pre parser successful", filename);
+	kernel->debug.Output(Debug::_Lv1, "%s pre parser successful", filename);
 	return true;
 }
 
@@ -303,7 +303,7 @@ bool ElfLoader::SetMapAddr()
 		elf.map = 0;
 	}
 
-	kernel->debug->Output(Debug::_Lv1, "%s set mapping address successful", filename);
+	kernel->debug.Output(Debug::_Lv1, "%s set mapping address successful", filename);
 	return true;
 }
 
@@ -328,7 +328,7 @@ bool ElfLoader::LoadProgram()
 		}
 	}
 
-	kernel->debug->Output(Debug::_Lv1, "%s load program successful", filename);
+	kernel->debug.Output(Debug::_Lv1, "%s load program successful", filename);
 	return true;
 }
 
@@ -371,7 +371,7 @@ bool ElfLoader::PostParser()
 		}
 	}
 
-	kernel->debug->Output(Debug::_Lv1, "%s post parser successful", filename);
+	kernel->debug.Output(Debug::_Lv1, "%s post parser successful", filename);
 	return true;
 }
 
@@ -397,7 +397,7 @@ bool ElfLoader::SharedObjs()
 			//Load shared object lib
 			if (false == LibraryTool().Install(path))
 			{
-				kernel->debug->Error("%s load shared object %s failed", filename, path);
+				kernel->debug.Error("%s load shared object %s failed", filename, path);
 				delete[] path;
 				return false;
 			}
@@ -454,7 +454,7 @@ bool ElfLoader::RelEntries()
 				if (0 == symAddr && symEntry.shndx) symAddr = elf.map + symEntry.value;
 
 				//Get the address of undefined symbol entry
-				if (0 == symAddr) symAddr = kernel->symbol->Search(symName);
+				if (0 == symAddr) symAddr = kernel->symbol.Search(symName);
 
 				//Searching for symbol entry in shared objects
 				if (0 == symAddr) symAddr = LibraryTool().SearchSymbol(symName);
@@ -464,12 +464,12 @@ bool ElfLoader::RelEntries()
 				{
 					if (true == isIgnoreUnresolvedSymbols)
 					{
-						kernel->debug->Warn("%s relocation symbols ignore, symbol %s not found", filename, symName);
+						kernel->debug.Warn("%s relocation symbols ignore, symbol %s not found", filename, symName);
 						continue;
 					}
 					else
 					{
-						kernel->debug->Error("%s relocation symbols failed, symbol %s not found", filename, symName);
+						kernel->debug.Error("%s relocation symbols failed, symbol %s not found", filename, symName);
 						return false;
 					}
 				}
@@ -478,13 +478,13 @@ bool ElfLoader::RelEntries()
 				RelSymCall(relAddr, symAddr, relEntry.type, symEntry.size);
 
 				//Output debug message
-				kernel->debug->Output(Debug::_Lv0, "%s rel name %s, relAddr 0x%lx, symAddr 0x%lx", 
+				kernel->debug.Output(Debug::_Lv0, "%s rel name %s, relAddr 0x%lx, symAddr 0x%lx", 
 					filename, symName, relAddr, symAddr);
 			}
 		}
 	}
 
-	kernel->debug->Output(Debug::_Lv1, "%s relocation entries successful", filename);
+	kernel->debug.Output(Debug::_Lv1, "%s relocation entries successful", filename);
 	return true;
 }
 
@@ -724,7 +724,7 @@ bool ElfLoader::Execute(const char* symbol, int argc, char* argv[])
 			return true;
 		}
 	}
-	kernel->debug->Error("%s %s not found", filename, symbol);
+	kernel->debug.Error("%s %s not found", filename, symbol);
 	return false;
 }
 

@@ -519,4 +519,4 @@ int SdCard::Read(uint8_t* rxData, uint32_t blkSize, uint32_t sector)
 
 
 ///Register driver
-REGISTER_DRIVER(SdCard, DriverID::_storage + 0, sdcard);
+REGISTER_DRIVER(new SdCard(), DriverID::_block, sdcard);

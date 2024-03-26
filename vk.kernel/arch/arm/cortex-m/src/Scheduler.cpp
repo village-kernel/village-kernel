@@ -10,94 +10,80 @@
 #include "HalHeaders.h"
 
 
-/// @brief ConcreteScheduler
-class ConcreteScheduler : public Scheduler
+/// @brief Constructor
+ConcreteScheduler::ConcreteScheduler()
+	:isStartSchedule(false)
 {
-private:
-	//Members
-	Interrupt* interrupt;
-	bool isStartSchedule;
-public:
-	/// @brief Constructor
-	ConcreteScheduler()
-		:interrupt(NULL),
-		isStartSchedule(false)
+}
+
+
+/// @brief Destructor
+ConcreteScheduler::~ConcreteScheduler()
+{
+}
+
+
+/// @brief Scheduler Setup
+void ConcreteScheduler::Setup()
+{
+	
+}
+
+
+/// @brief Scheduler Exit
+void ConcreteScheduler::Exit()
+{
+
+}
+
+
+/// @brief Start scheduler
+void ConcreteScheduler::Start()
+{
+	//Clear start schedule flag
+	isStartSchedule = false;
+
+	//Get frist task psp
+	uint32_t psp = kernel->thread.GetTaskPSP();
+
+	//Set frist task esp
+	__asm volatile("msr psp, %0" : "=r"(psp));
+
+	//Change to use PSP, set bit[1] SPSEL
+	__asm volatile("mrs r0, control");
+	__asm volatile("orr r0, r0, #2");
+	__asm volatile("msr control, r0");
+
+	//Move to Unprivileged level, Set bit[0] nPRIV
+	__asm volatile("mrs r0, control");
+	__asm volatile("orr r0, r0, #1");
+	__asm volatile("msr control, r0");
+
+	//Set start schedule flag
+	isStartSchedule = true;
+
+	//Execute thread
+	kernel->thread->IdleTask();
+}
+
+
+/// @brief Rescheduler task
+/// @param access scheduler access
+void ConcreteScheduler::Sched(ConcreteScheduler::Access access)
+{
+	if (false == isStartSchedule) return;
+
+	if (Access::Privileged == access)
 	{
+		// trigger PendSV directly
+		SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
 	}
-
-
-	/// @brief Destructor
-	~ConcreteScheduler()
+	else
 	{
+		// call Supervisor exception to get Privileged access
+		__asm volatile("SVC #255");
 	}
-
-
-	/// @brief Scheduler Setup
-	void Setup()
-	{
-		
-	}
-
-
-	/// @brief Scheduler Exit
-	void Exit()
-	{
-
-	}
-
-
-	/// @brief Start scheduler
-	void Start()
-	{
-		//Clear start schedule flag
-		isStartSchedule = false;
-
-		//Get frist task psp
-		uint32_t psp = kernel->thread->GetTaskPSP();
-
-		//Set frist task esp
-		__asm volatile("msr psp, %0" : "=r"(psp));
-
-		//Change to use PSP, set bit[1] SPSEL
-		__asm volatile("mrs r0, control");
-		__asm volatile("orr r0, r0, #2");
-		__asm volatile("msr control, r0");
-
-		//Move to Unprivileged level, Set bit[0] nPRIV
-		__asm volatile("mrs r0, control");
-		__asm volatile("orr r0, r0, #1");
-		__asm volatile("msr control, r0");
-
-		//Set start schedule flag
-		isStartSchedule = true;
-
-		//Execute thread
-		kernel->thread->IdleTask();
-	}
-
-
-	/// @brief Rescheduler task
-	/// @param access scheduler access
-	void Sched(Scheduler::Access access)
-	{
-		if (false == isStartSchedule) return;
-
-		if (Access::Privileged == access)
-		{
-			// trigger PendSV directly
-			SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
-		}
-		else
-		{
-			// call Supervisor exception to get Privileged access
-			__asm volatile("SVC #255");
-		}
-	}
-};
-
-
-///Register component
-REGISTER_COMPONENT(ConcreteScheduler, ComponentID::_scheduler, scheduler);
+}
 
 
 /// @brief Interrupt handlers
@@ -106,8 +92,8 @@ extern "C"
 	/// @brief Systick handler
 	void SysTick_Handler(void)
 	{
-		kernel->system->SysTickCounter();
-		kernel->scheduler->Sched(Scheduler::Privileged);
+		kernel->system.SysTickCounter();
+		kernel->scheduler.Sched(ConcreteScheduler::Privileged);
 	}
 
 
@@ -127,13 +113,13 @@ extern "C"
 		__asm volatile("stmdb %0!, {r4-r11}" : "=r"(psp));
 
 		//Save current value of psp
-		kernel->thread->SaveTaskPSP(psp);
+		kernel->thread.SaveTaskPSP(psp);
 
 		//Select next task
-		kernel->thread->SelectNextTask();
+		kernel->thread.SelectNextTask();
 
 		//Get its past psp value, return psp is in R0
-		psp = kernel->thread->GetTaskPSP();
+		psp = kernel->thread.GetTaskPSP();
 
 		//Retrieve R4-R11 from psp frame stack
 		__asm volatile("ldmia %0!, {r4-r11}" : "=r"(psp));

@@ -47,8 +47,8 @@ bool UartSerial::Open()
 }
 
 
-/// @brief Exit
-void UartSerial::Exit()
+/// @brief Close
+void UartSerial::Close()
 {
 
 }
@@ -136,4 +136,4 @@ int UartSerial::Read(uint8_t* data, uint32_t size, uint32_t offset)
 
 
 ///Register driver
-REGISTER_DRIVER(UartSerial, DriverID::_serial, serial0);
+REGISTER_DRIVER(new UartSerial(), DriverID::_character, serial0);

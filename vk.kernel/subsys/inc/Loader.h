@@ -7,13 +7,13 @@
 #ifndef __LOADER_H__
 #define __LOADER_H__
 
-#include "Component.h"
+#include "Module.h"
 #include "ElfExecutor.h"
 #include "List.h"
 
 
 /// @brief Loader
-class Loader : public Component
+class Loader : public Module
 {
 public:
 	//Enumerations

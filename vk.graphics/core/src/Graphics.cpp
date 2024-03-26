@@ -5,6 +5,7 @@
 // $Copyright: Copyright (C) village
 //###########################################################################
 #include "Graphics.h"
+#include "DrvStream.h"
 #include "Window.h"
 #include "Kernel.h"
 
@@ -32,39 +33,27 @@ Graphics::~Graphics()
 void Graphics::Initialize(const char* screen, const char* keyboard, const char* mouse)
 {
 	//Get the universal driver by driver name
-	Driver* screendrv = kernel->device->GetDriver(screen);
-
-	//Get the specified lcd driver by driver ioctrl 
-	if (NULL != screendrv)
+	DrvStream screendrv;
+	if (screendrv.Open(screen, FileMode::_Read))
 	{
-		screendrv->Open();
-		screendrv->IOCtrl(0, (void*)&fbdev);
-	}
-
-	//Initialize display
-	if (NULL != fbdev)
-	{
-		display = new Display();
-		display->Initialize(fbdev);
-	}
-
-	//Get the universal driver by driver name
-	Driver* keyboarddrv = kernel->device->GetDriver(keyboard);
-
-	//Initialize keyboard
-	if (NULL != keyboarddrv)
-	{
-		keyboarddrv->Open();
+		//Get the specified lcd driver by driver ioctrl 
+		screendrv.IOCtrl(0, (void*)&fbdev);
+		
+		//Initialize display
+		if (NULL != fbdev)
+		{
+			display = new Display();
+			display->Initialize(fbdev);
+		}
 	}
 
 	//Get the universal driver by driver name
-	Driver* mousedrv = kernel->device->GetDriver(mouse);
+	DrvStream keyboarddrv;
+	keyboarddrv.Open(keyboard, FileMode::_Read);
 
-	//Initialize keyboard
-	if (NULL != mousedrv)
-	{
-		mousedrv->Open();
-	}
+	//Get the universal driver by driver name
+	DrvStream mousedrv;
+	mousedrv.Open(mouse, FileMode::_Read);
 }
 
 

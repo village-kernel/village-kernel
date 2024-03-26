@@ -25,7 +25,7 @@ Mutex::~Mutex()
 /// @brief Mutex lock
 void Mutex::Lock()
 {
-	while (true == lock) { kernel->thread->Sleep(ticks); }
+	while (true == lock) { kernel->thread.Sleep(ticks); }
 	lock = !lock;
 }
 

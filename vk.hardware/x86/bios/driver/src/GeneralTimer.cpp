@@ -49,4 +49,4 @@ public:
 
 
 ///Register driver
-REGISTER_DRIVER(GeneralTimer, DriverID::_timer + 0, timer0);
+REGISTER_DRIVER(new GeneralTimer(), DriverID::_miscellaneous, timer0);

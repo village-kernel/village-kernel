@@ -7,11 +7,11 @@
 #ifndef __WORK_QUEUE_H__
 #define __WORK_QUEUE_H__
 
-#include "Component.h"
+#include "Module.h"
 
 
 /// @brief WorkQueue
-class WorkQueue : public Component
+class WorkQueue : public Module
 {
 public:
 	//Enumerations

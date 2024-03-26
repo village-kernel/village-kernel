@@ -7,31 +7,41 @@
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
 
-#include "Component.h"
+#include "Kernel.h"
+#include "Mutex.h"
+#include "DrvStream.h"
 
 
-/// @brief Debug
-class Debug : public Component
+/// @brief ConcreteDebug
+class ConcreteDebug : public Debug
 {
-public:
-	//Debug level
-	enum Level
-	{
-		_Lv0 = 0,
-		_Lv1,
-		_Lv2,
-		_Lv3,
-		_Lv4,
-		_Lv5
-	};
+private:
+	//Static constants
+	static const uint16_t buf_size = 100;
+
+	//Members
+	DrvStream transceiver;
+	Mutex     mutex;
+	char      data[buf_size] = { 0 };
+	char      txBuffer[buf_size] = { 0 };
+	uint16_t  txBufPos;
+	uint8_t   debugLevel;
+
+	//Methods
+	void Write(const char* data);
+	void Sending();
 public:
 	//Methods
-	virtual void Log(const char* format, ...) = 0;
-	virtual void Info(const char* format, ...) = 0;
-	virtual void Error(const char* format, ...) = 0;
-	virtual void Warn(const char* format, ...) = 0;
-	virtual void Output(int level, const char* format, ...) = 0;
-	virtual void SetDebugLevel(int level) = 0;
+	ConcreteDebug();
+	~ConcreteDebug();
+	void Setup();
+	void Exit();
+	void Log(const char* format, ...);
+	void Info(const char* format, ...);
+	void Error(const char* format, ...);
+	void Warn(const char* format, ...);
+	void Output(int level, const char* format, ...);
+	void SetDebugLevel(int level);
 };
 
 #endif //!__DEBUG_H__

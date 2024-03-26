@@ -548,4 +548,4 @@ public:
 
 
 ///Register driver
-REGISTER_DRIVER(ILI9488Drv, DriverID::_display, display0);
+REGISTER_DRIVER(new ILI9488Drv(), DriverID::_miscellaneous, display0);

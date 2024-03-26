@@ -26,23 +26,23 @@ FatSystem::~FatSystem()
 /// @brief Setup
 void FatSystem::Setup()
 {
-	FileSystem* filesys = (FileSystem*)kernel->feature->GetComponent(ComponentID::_fileSystem);
+	FileSystem* filesys = (FileSystem*)kernel->feature.GetModule("fileSystem");
 	if (NULL == filesys)
 	{
-		kernel->debug->Error("file system feature not support");
+		kernel->debug.Error("file system feature not support");
 		return;
 	}
 
-	diskdrv = kernel->device->GetDriver(DriverID::_storage);
+	diskdrv = kernel->device.GetDriver("disk0");
 	if (NULL == diskdrv || !diskdrv->Open())
 	{
-		kernel->debug->Error("Not disk driver found");
+		kernel->debug.Error("Not disk driver found");
 		return;
 	}
 
 	if (!ReadMBR())
 	{
-		kernel->debug->Error("Not a valid disk");
+		kernel->debug.Error("Not a valid disk");
 		return;
 	}
 
@@ -62,7 +62,7 @@ void FatSystem::Setup()
 		}
 	}
 
-	kernel->debug->Output(Debug::_Lv2, "Initialize FAT file system successful");
+	kernel->debug.Output(Debug::_Lv2, "Initialize FAT file system successful");
 }
 
 
@@ -102,4 +102,4 @@ bool FatSystem::CheckDPT(DPT* dpt)
 
 
 ///Register file system
-REGISTER_FS(FatSystem, fat);
+REGISTER_FS(new FatSystem(), fat);

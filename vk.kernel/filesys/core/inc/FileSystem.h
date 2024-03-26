@@ -7,13 +7,13 @@
 #ifndef __FILE_SYSTEM_H__
 #define __FILE_SYSTEM_H__
 
-#include "Component.h"
+#include "Module.h"
 #include "FileSys.h"
 #include "FileOpts.h"
 
 
 /// @brief FileSystem
-class FileSystem : public Component
+class FileSystem : public Module
 {
 public:
 	//Methods

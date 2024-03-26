@@ -8,7 +8,8 @@
 #ifndef __COMMAND_MSG_MGR_H__
 #define __COMMAND_MSG_MGR_H__
 
-#include "Driver.h"
+#include "DrvStream.h"
+
 
 //CmdMsg struct
 struct CmdMsg
@@ -47,7 +48,7 @@ private:
 	uint8_t txBuffer[arg_buffer_size] = { 0 };
 	uint8_t rxBuffer[arg_buffer_size] = { 0 };
 	uint8_t* cmdHistory[cmd_history_size] = { NULL };
-	Driver* transceiver;
+	DrvStream transceiver;
 	InputMode inputMode;
 
 	//Methods

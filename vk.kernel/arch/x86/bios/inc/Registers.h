@@ -7,6 +7,8 @@
 #ifndef __REGISTERS_X86_H__
 #define __REGISTERS_X86_H__
 
+#include "stdint.h"
+
 struct Registers
 {
 	//Data segment selector

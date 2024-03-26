@@ -7,58 +7,54 @@
 #ifndef __THREAD_H__
 #define __THREAD_H__
 
-#include "Component.h"
+#include "Kernel.h"
 #include "Registers.h"
+#include "Cast.h"
 #include "List.h"
 
 
-/// @brief Thread
-class Thread : public Component
-{
-public:
-	//Enumerations
-	enum TaskState 
-	{
-		Running = 0,
-		Suspend,
-		Blocked,
-		Exited,
-	};
+#ifndef TASK_STACK
+#define TASK_STACK      1024
+#endif
 
-	//Structures
-	struct Task 
-	{
-		char*            name;
-		uint32_t         pid;
-		uint32_t         psp;
-		uint32_t         ticks;
-		uint32_t         stack;
-		TaskState        state;
-		
-		Task(uint32_t stack = 0, char* name = NULL)
-			:name(name),
-			pid(-1),
-			psp(0),
-			ticks(0),
-			stack(stack),
-			state(TaskState::Suspend)
-		{}
-	};
+
+/// @brief ConcreteThread
+class ConcreteThread : public Thread, public Class
+{
+private:
+	//Static constants
+	static const uint32_t task_stack_size = TASK_STACK;
+	static const uint32_t psp_frame_size = sizeof(TaskContext) >> 2;
+	
+	//Members
+	List<Task*> tasks;
+	Memory*     memory;
+	System*     system;
+	Scheduler*  scheduler;
+
+	//Members
+	void TaskHandler(Function function, void* user, void* args);
 public:
 	///Methods
-	virtual int CreateTask(const char* name, Function function, void* user = NULL, void* args = NULL) = 0;
-	virtual int CreateTask(const char* name, Method method, Class *user, void* args = NULL) = 0;
-	virtual int DeleteTask(int pid) = 0;
-	virtual bool WaitForTask(int pid) = 0;
-	virtual List<Task*> GetTasks() = 0;
-	virtual void Sleep(uint32_t ticks) = 0;
-	virtual void TaskExit() = 0;
+	ConcreteThread();
+	~ConcreteThread();
+	void Setup();
+	void Exit();
+
+	///Thread Methods
+	int CreateTask(const char* name, Function function, void* user = NULL, void* args = NULL);
+	int CreateTask(const char* name, Method method, Class *user, void* args = NULL);
+	int DeleteTask(int pid);
+	bool WaitForTask(int pid);
+	List<Task*> GetTasks();
+	void Sleep(uint32_t ticks);
+	void TaskExit();
 
 	//Scheduler Methods
-	virtual void SaveTaskPSP(uint32_t psp) = 0;
-	virtual uint32_t GetTaskPSP() = 0;
-	virtual void SelectNextTask() = 0;
-	virtual void IdleTask() = 0;
+	void SaveTaskPSP(uint32_t psp);
+	uint32_t GetTaskPSP();
+	void SelectNextTask();
+	void IdleTask();
 };
 
 #endif // !__THREAD_H__

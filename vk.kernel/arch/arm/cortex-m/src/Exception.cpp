@@ -9,27 +9,30 @@
 #include "HalHeaders.h"
 
 
-/// @brief ConcreteException
-class ConcreteException : public Exception
+/// @brief Constructor
+Exception::Exception()
 {
-public:
-	/// @brief Exception Setup
-	void Setup()
-	{
-		
-	}
+}
 
 
-	/// @brief Exception Exit
-	void Exit()
-	{
-
-	}
-};
+/// @brief Deconstructor
+Exception::~Exception()
+{
+}
 
 
-///Register component
-REGISTER_COMPONENT(ConcreteException, ComponentID::_exception, exception);
+/// @brief Exception Setup
+void Exception::Setup()
+{
+	
+}
+
+
+/// @brief Exception Exit
+void Exception::Exit()
+{
+
+}
 
 
 /// @brief Output stacked info
@@ -46,15 +49,15 @@ extern "C" void stacked_info(unsigned int * hardfault_args)
 	volatile uint32_t stacked_pc  = ((uint32_t)hardfault_args[6]);
 	volatile uint32_t stacked_psr = ((uint32_t)hardfault_args[7]);
 
-	kernel->debug->Output(Debug::_Lv5, "Hard_Fault_Handler:");
-	kernel->debug->Output(Debug::_Lv5, "r0:   0x%08lx", stacked_r0);
-	kernel->debug->Output(Debug::_Lv5, "r1:   0x%08lx", stacked_r1);
-	kernel->debug->Output(Debug::_Lv5, "r2:   0x%08lx", stacked_r2);
-	kernel->debug->Output(Debug::_Lv5, "r3:   0x%08lx", stacked_r3);
-	kernel->debug->Output(Debug::_Lv5, "r12:  0x%08lx", stacked_r12);
-	kernel->debug->Output(Debug::_Lv5, "lr:   0x%08lx", stacked_lr);
-	kernel->debug->Output(Debug::_Lv5, "pc:   0x%08lx", stacked_pc);
-	kernel->debug->Output(Debug::_Lv5, "xpsr: 0x%08lx", stacked_psr);
+	kernel->debug.Output(Debug::_Lv5, "Hard_Fault_Handler:");
+	kernel->debug.Output(Debug::_Lv5, "r0:   0x%08lx", stacked_r0);
+	kernel->debug.Output(Debug::_Lv5, "r1:   0x%08lx", stacked_r1);
+	kernel->debug.Output(Debug::_Lv5, "r2:   0x%08lx", stacked_r2);
+	kernel->debug.Output(Debug::_Lv5, "r3:   0x%08lx", stacked_r3);
+	kernel->debug.Output(Debug::_Lv5, "r12:  0x%08lx", stacked_r12);
+	kernel->debug.Output(Debug::_Lv5, "lr:   0x%08lx", stacked_lr);
+	kernel->debug.Output(Debug::_Lv5, "pc:   0x%08lx", stacked_pc);
+	kernel->debug.Output(Debug::_Lv5, "xpsr: 0x%08lx", stacked_psr);
 
 	while (1);
 }

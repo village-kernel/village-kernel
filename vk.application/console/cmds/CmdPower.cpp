@@ -18,7 +18,7 @@ public:
 	/// @param argv 
 	void Execute(int argc, char* argv[])
 	{
-		kernel->system->Reboot();
+		kernel->system.Reboot();
 	}
 };
 

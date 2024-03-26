@@ -5,78 +5,54 @@
 // $Copyright: Copyright (C) village
 //###########################################################################
 #include "Device.h"
-#include "Driver.h"
-#include "Kernel.h"
-#include "List.h"
 
 
-/// @brief ConcreteDevice
-class ConcreteDevice : public Device
+/// @brief Constructor
+ConcreteDevice::ConcreteDevice()
 {
-private:
-	//Members
-	List<Driver*> drivers;
-public:
-	/// @brief Constructor
-	ConcreteDevice()
-	{
-	}
+}
 
 
-	/// @brief Destructor
-	~ConcreteDevice()
-	{
-	}
+/// @brief Destructor
+ConcreteDevice::~ConcreteDevice()
+{
+}
 
 
-	/// @brief Device Setup
-	void Setup()
-	{
-		
-	}
-
-
-	/// @brief Device Exit
-	void Exit()
-	{
-		drivers.Release();
-	}
-
-
-	/// @brief Register driver object
-	/// @param driver driver pointer
-	void RegisterDriver(Driver* driver)
-	{
-		drivers.Insert(driver, driver->GetID(), driver->GetName());
-	}
+/// @brief Device Setup
+void ConcreteDevice::Setup()
+{
 	
-
-	/// @brief Deregister driver object
-	/// @param driver driver pointer
-	void DeregisterDriver(Driver* driver)
-	{
-		drivers.Remove(driver);
-	}
+}
 
 
-	/// @brief Get the driver object
-	/// @param id driver id
-	/// @return driver
-	Driver* GetDriver(uint32_t id)
-	{
-		return drivers.GetItem(id);
-	}
+/// @brief Device Exit
+void ConcreteDevice::Exit()
+{
+	drivers.Release();
+}
 
 
-	/// @brief Get the driver object by name
-	/// @param name driver name
-	/// @return driver
-	Driver* GetDriver(const char* name)
-	{
-		return drivers.GetItemByName(name);
-	}
-};
+/// @brief Register driver object
+/// @param driver driver pointer
+void ConcreteDevice::RegisterDriver(Driver* driver)
+{
+	drivers.Add(driver, driver->GetName());
+}
 
 
-///Register component
-REGISTER_COMPONENT(ConcreteDevice, ComponentID::_device, device);
+/// @brief Deregister driver object
+/// @param driver driver pointer
+void ConcreteDevice::DeregisterDriver(Driver* driver)
+{
+	drivers.Remove(driver);
+}
+
+
+/// @brief Get the driver object by name
+/// @param name driver name
+/// @return driver
+Driver* ConcreteDevice::GetDriver(const char* name)
+{
+	return drivers.GetItemByName(name);
+}

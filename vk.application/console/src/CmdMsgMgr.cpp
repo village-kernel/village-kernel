@@ -24,18 +24,16 @@ CmdMsgMgr::CmdMsgMgr()
 ///CmdMsgMgr initialize
 void CmdMsgMgr::Initialize(const char* driver)
 {
-	transceiver = kernel->device->GetDriver(driver);
+	transceiver.Open(driver, FileMode::_ReadWrite);
 }
 
 
 ///CmdMsgMgr execute
 bool CmdMsgMgr::Execute()
 {
-	if (NULL == transceiver) return false;
-
 	//Sent data when txbuffer not empty
 	//Reset txBufPos when sent data successfully
-	if (txBufPos && transceiver->Write(txBuffer, txBufPos)) txBufPos = 0;
+	if (txBufPos && transceiver.Write((char*)txBuffer, txBufPos)) txBufPos = 0;
 
 	//Received data and decode
 	return HandleInputData();
@@ -45,8 +43,7 @@ bool CmdMsgMgr::Execute()
 ///CmdMsgMgr write
 void CmdMsgMgr::Write(uint8_t* msg, uint16_t size)
 {
-	if (NULL == transceiver) return;
-
+	//Calculate the size of msg
 	size = (0 == size) ? strlen((const char*)msg) : size;
 
 	//Copy msg data into txBuffer
@@ -57,13 +54,13 @@ void CmdMsgMgr::Write(uint8_t* msg, uint16_t size)
 		//The txBuffer is full, block here until the data is sent
 		if (txBufPos >= arg_buffer_size)
 		{
-			while (!transceiver->Write(txBuffer, txBufPos)) {}
+			while (!transceiver.Write((char*)txBuffer, txBufPos)) {}
 			txBufPos = 0;
 		}
 	}
 
 	//Sent data when txbuffer not empty
-	if (txBufPos && transceiver->Write(txBuffer, txBufPos)) txBufPos = 0;
+	if (txBufPos && transceiver.Write((char*)txBuffer, txBufPos)) txBufPos = 0;
 }
 
 
@@ -142,13 +139,11 @@ void CmdMsgMgr::RestoredHistory()
 ///CmdMsgMgr Handle input data
 bool CmdMsgMgr::HandleInputData()
 {
-	if (NULL == transceiver) return false;
-
 	const uint8_t br_buf_size = 20;
 	uint8_t brBuff[br_buf_size] = { 0 };
 	uint8_t brSize = 0;
 
-	while ((brSize = transceiver->Read(brBuff, br_buf_size)) > 0)
+	while ((brSize = transceiver.Read((char*)brBuff, br_buf_size)) > 0)
 	{
 		for (uint8_t i = 0; i < brSize; i++)
 		{

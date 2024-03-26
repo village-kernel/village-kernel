@@ -23,7 +23,7 @@ public:
 			console.Output("Usage: debug [level]");
 			return;
 		}
-		kernel->debug->SetDebugLevel(argv[1][0] - '0');
+		kernel->debug.SetDebugLevel(argv[1][0] - '0');
 	}
 };
 

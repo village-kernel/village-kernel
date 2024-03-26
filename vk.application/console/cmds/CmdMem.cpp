@@ -18,8 +18,8 @@ public:
 	/// @param argv 
 	void Execute(int argc, char* argv[])
 	{
-		uint32_t size = kernel->memory->GetSize();
-		uint32_t used = kernel->memory->GetUsed();
+		uint32_t size = kernel->memory.GetSize();
+		uint32_t used = kernel->memory.GetUsed();
 		uint32_t per  = (uint32_t)((float)used / (float)size * 100);
 		console.Output("memory size: %d Byte, memory used: %d Byte, percentage used: %d %", size, used, per);
 	}

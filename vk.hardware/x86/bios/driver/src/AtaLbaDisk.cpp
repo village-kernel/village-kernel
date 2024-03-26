@@ -130,4 +130,4 @@ public:
 
 
 ///Register driver
-REGISTER_DRIVER(AtaLbaDisk, DriverID::_storage, hdb);
+REGISTER_DRIVER(new AtaLbaDisk(), DriverID::_block, disk0);

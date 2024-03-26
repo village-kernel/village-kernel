@@ -7,6 +7,8 @@
 #ifndef __FILE_DEFINES_H__
 #define __FILE_DEFINES_H__
 
+#include "stddef.h"
+#include "stdint.h"
 
 /// @brief FileMode
 enum FileMode
@@ -14,6 +16,7 @@ enum FileMode
 	_OpenExisting  = 0x00,
 	_Read          = 0x01,
 	_Write         = 0x02,
+	_ReadWrite     = 0x03,
 	_CreateNew     = 0x04,
 	_CreateAlways  = 0x10,
 	_OpenAppend    = 0x30,
@@ -78,19 +81,19 @@ struct MountNode
 };
 
 
-///Component register macro
-#define REGISTER_FS(fs, name)                                                         \
-fs p##name;                                                                           \
-static void __init _Fs_ctor_##name()                                                  \
-{                                                                                     \
-	FileSystem* filesys = (FileSystem*)kernel->feature->GetComponent("fileSystem");   \
-	if (NULL != filesys) filesys->RegisterFS(&p##name, (char*)#name);                 \
-}                                                                                     \
-static void __exit _Fs_dtor_##name()                                                  \
-{                                                                                     \
-	FileSystem* filesys = (FileSystem*)kernel->feature->GetComponent("fileSystem");   \
-	if (NULL != filesys) filesys->DeregisterFS(&p##name, (char*)#name);               \
-}
+///Filesystem register macro
+#define REGISTER_FS(fs, name)                                                           \
+static struct _FS_##name {                                                              \
+	FileSys* filesystem = fs;                                                           \
+	_FS_##name() {                                                                      \
+		FileSystem* filesys = (FileSystem*)kernel->feature.GetModule("fileSystem");     \
+		if (NULL != filesys) filesys->RegisterFS(filesystem, #name);                    \
+	}                                                                                   \
+	~_FS_##name() {                                                                     \
+		FileSystem* filesys = (FileSystem*)kernel->feature.GetModule("fileSystem");     \
+		if (NULL != filesys) filesys->DeregisterFS(filesystem, #name);                  \
+	}                                                                                   \
+} const _fs_##name __attribute__((used,__section__(".fs")))
 
 
 #endif //!__FILE_DEFINES_H__

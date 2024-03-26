@@ -5,99 +5,73 @@
 // $Copyright: Copyright (C) village
 //###########################################################################
 #include "Symbol.h"
-#include "Kernel.h"
 #include "string.h"
-#include "List.h"
 
 
-/// @brief ConcreteSymbol
-class ConcreteSymbol : public Symbol
+/// @brief Constructor
+ConcreteSymbol::ConcreteSymbol()
 {
-private:
-	//Structures
-	struct Symbol
+}
+
+
+/// @brief Destructor
+ConcreteSymbol::~ConcreteSymbol()
+{
+}
+
+
+/// @brief Setup
+void ConcreteSymbol::Setup()
+{
+	
+}
+
+
+/// @brief Exit
+void ConcreteSymbol::Exit()
+{
+	entrys.Release();
+}
+
+
+/// @brief Export symbol
+/// @param symAddr symbol address
+/// @param name symbol name
+void ConcreteSymbol::Export(uint32_t symAddr, const char* name)
+{
+	entrys.Add(new Entry(name, symAddr));
+}
+
+
+/// @brief Unexport symbol
+/// @param name symbol name
+void ConcreteSymbol::Unexport(const char* name)
+{
+	for (entrys.Begin(); !entrys.IsEnd(); entrys.Next())
 	{
-		const char* name;
-		uint32_t    addr;
+		Entry* entry = entrys.Item();
 
-		Symbol(const char* name, uint32_t addr):
-			name(name),
-			addr(addr)
-		{}
-	};
-
-	//Members
-	List<Symbol*> symbols;
-public:
-	/// @brief Constructor
-	ConcreteSymbol()
-	{
-	}
-
-
-	/// @brief Destructor
-	~ConcreteSymbol()
-	{
-	}
-
-
-	/// @brief Setup
-	void Setup()
-	{
-		
-	}
-
-
-	/// @brief Exit
-	void Exit()
-	{
-		symbols.Release();
-	}
-
-
-	/// @brief Export symbol
-	/// @param symAddr symbol address
-	/// @param name symbol name
-	void Export(uint32_t symAddr, const char* name)
-	{
-		symbols.Add(new Symbol(name, symAddr));
-	}
-
-
-	/// @brief Unexport symbol
-	/// @param name symbol name
-	void Unexport(const char* name)
-	{
-		for (symbols.Begin(); !symbols.IsEnd(); symbols.Next())
+		if (0 == strcmp(name, entry->name))
 		{
-			Symbol* symbol = symbols.Item();
-
-			if (0 == strcmp(name, symbol->name))
-			{
-				symbols.Remove(symbol, symbols.GetNid()); break;
-			}
+			entrys.Remove(entry, entrys.GetNid()); break;
 		}
 	}
+}
 
 
-	/// @brief Search symbol by name and return addr
-	/// @param name symbol name
-	/// @return symbol address
-	uint32_t Search(const char* name)
+/// @brief Search symbol by name and return addr
+/// @param name symbol name
+/// @return symbol address
+uint32_t ConcreteSymbol::Search(const char* name)
+{
+	for (entrys.Begin(); !entrys.IsEnd(); entrys.Next())
 	{
-		for (symbols.Begin(); !symbols.IsEnd(); symbols.Next())
+		Entry* entry = entrys.Item();
+
+		if (0 == strcmp(name, entry->name))
 		{
-			Symbol* symbol = symbols.Item();
-
-			if (0 == strcmp(name, symbol->name))
-			{
-				return symbol->addr;
-			}
+			return entry->addr;
 		}
-		return 0;
 	}
-};
-
-
-///Register component
-REGISTER_COMPONENT(ConcreteSymbol, ComponentID::_symbol, symbol);
+	return 0;
+}

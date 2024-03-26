@@ -5,249 +5,236 @@
 // $Copyright: Copyright (C) village
 //###########################################################################
 #include "System.h"
-#include "Kernel.h"
 #include "HalHeaders.h"
 
 
-/// @brief ConcreteSystem
-class ConcreteSystem : public System
+/// @brief Constructor
+ConcreteSystem::ConcreteSystem()
+	:sysTicks(0),
+	cyclesInMicro(0)
+{}
+
+
+/// @brief Destructor
+ConcreteSystem::~ConcreteSystem()
 {
-private:
-	///Static constants
-	static const uint32_t microsInSec = 1000000;
-	static const uint32_t microsInMilli = 1000;
-
-	//Members
-	uint32_t sysTicks;
-	uint32_t cyclesInMicro;
-public:
-	/// @brief Constructor
-	ConcreteSystem()
-		:sysTicks(0),
-		cyclesInMicro(0)
-	{}
+}
 
 
-	/// @brief System Setup
-	void Setup()
-	{
-		//Config clock
-		ConfigCoreDebug();
-		ConfigSysTick();
-		ConfigureForXtal();
-	}
+/// @brief System Setup
+void ConcreteSystem::Setup()
+{
+	//Config clock
+	ConfigCoreDebug();
+	ConfigSysTick();
+	ConfigureForXtal();
+}
 
 
-	/// @brief System Exit
-	void Exit()
-	{
+/// @brief System Exit
+void ConcreteSystem::Exit()
+{
 
-	}
-
-
-	/// @brief Configure the main internal regulator output voltage
-	void ConfigurePower()
-	{
-		//Select regulator voltage output Scale 1 mode
-		RCC->APB1ENR |= RCC_APB1ENR_PWREN;
-		PWR->CR |= PWR_CR_VOS;
-	}
+}
 
 
-	/// @brief Configure core debug
-	void ConfigCoreDebug()
-	{
-		//Enable Data Watchpoint and Trace unit and turn on its main counter
-		CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-		DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-	}
+/// @brief Configure the main internal regulator output voltage
+void ConcreteSystem::ConfigurePower()
+{
+	//Select regulator voltage output Scale 1 mode
+	RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+	PWR->CR |= PWR_CR_VOS;
+}
 
 
-	/// @brief Config system tick
-	void ConfigSysTick()
-	{
-		//Select Systick clock source: SYSCLK_MHZ/8 = 168/8 = 21M
-		SysTick->CTRL &= ~SysTick_CTRL_CLKSOURCE_Msk;
-
-		//Enable systick interrupt
-		SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
-
-		//Set systick reload value
-		SysTick->LOAD = 21000;
-
-		//Clear systick current value
-		SysTick->VAL = 0;
-
-		//Enable systick
-		SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
-
-		//Calculate the cyclesInMicro variable
-		cyclesInMicro = SystemCoreClock / microsInSec;
-	}
+/// @brief Configure core debug
+void ConcreteSystem::ConfigCoreDebug()
+{
+	//Enable Data Watchpoint and Trace unit and turn on its main counter
+	CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+	DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+}
 
 
-	/// @brief Configures the system to use an hsi crystal as clock source.
-	/// @brief HSI：16Mhz, PLL: 168Mhz, System Clock = PLL1, PCLK1 = 42Mhz, PCLK2=84Mhz.
-	void ConfigureForHsi()
-	{
-		const uint32_t pll_m = 8;
-		const uint32_t pll_n = 168;
-		const uint32_t pll_p = 2;
-		const uint32_t pll_q = 7;
+/// @brief Config system tick
+void ConcreteSystem::ConfigSysTick()
+{
+	//Select Systick clock source: SYSCLK_MHZ/8 = 168/8 = 21M
+	SysTick->CTRL &= ~SysTick_CTRL_CLKSOURCE_Msk;
 
-		//Enable HSI
-		RCC->CR |= ((uint32_t)RCC_CR_HSION);
-		while ((RCC->CR & RCC_CR_HSIRDY_Msk) != RCC_CR_HSIRDY);
+	//Enable systick interrupt
+	SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
 
-		//Configure the main PLL
-		RCC->PLLCFGR = (RCC_PLLCFGR_PLLSRC_HSI) |
-						(pll_m << RCC_PLLCFGR_PLLM_Pos) |
-						(pll_n << RCC_PLLCFGR_PLLN_Pos) |
-						(((pll_p >> 1u) - 1u) << RCC_PLLCFGR_PLLP_Pos) |
-						(pll_q << RCC_PLLCFGR_PLLQ_Pos);
+	//Set systick reload value
+	SysTick->LOAD = 21000;
 
-		//Enable the main PLL
-		RCC->CR |= RCC_CR_PLLON;
+	//Clear systick current value
+	SysTick->VAL = 0;
 
-		//Wait till the main PLL is ready
-		while((RCC->CR & RCC_CR_PLLRDY) == 0) {}
+	//Enable systick
+	SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
 
-		//Configure Flash prefetch, Instruction cache, Data cache and wait state
-		FLASH->ACR = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN |FLASH_ACR_DCEN |FLASH_ACR_LATENCY_5WS;
-
-		//HCLK = SYSCLK / 1
-		RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
-
-		//PCLK1 = HCLK / 4
-		RCC->CFGR |= RCC_CFGR_PPRE1_DIV4;
-
-		//PCLK2 = HCLK / 2
-		RCC->CFGR |= RCC_CFGR_PPRE2_DIV2;
-
-		//Select the main PLL as system clock source
-		RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
-		RCC->CFGR |= RCC_CFGR_SW_PLL;
-
-		//Wait till the main PLL is used as system clock source
-		while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL) {}
-
-		//Update the SystemCoreClock variable
-		SystemCoreClockUpdate();
-
-		//Update the cyclesInMicro variable
-		cyclesInMicro = SystemCoreClock / microsInSec;
-	}
+	//Calculate the cyclesInMicro variable
+	cyclesInMicro = SystemCoreClock / microsInSec;
+}
 
 
-	/// @brief Configures the system to use an hse crystal as clock source.
-	/// @brief XTAL：8Mhz, PLL: 168Mhz, System Clock = PLL1, PCLK1 = 42Mhz, PCLK2=84Mhz.
-	void ConfigureForXtal()
-	{
-		const uint32_t pll_m = 4;
-		const uint32_t pll_n = 168;
-		const uint32_t pll_p = 2;
-		const uint32_t pll_q = 7;
+/// @brief Configures the system to use an hsi crystal as clock source.
+/// @brief HSI：16Mhz, PLL: 168Mhz, System Clock = PLL1, PCLK1 = 42Mhz, PCLK2=84Mhz.
+void ConcreteSystem::ConfigureForHsi()
+{
+	const uint32_t pll_m = 8;
+	const uint32_t pll_n = 168;
+	const uint32_t pll_p = 2;
+	const uint32_t pll_q = 7;
 
-		//Enable HSE
-		RCC->CR |= ((uint32_t)RCC_CR_HSEON);
-		while ((RCC->CR & RCC_CR_HSERDY_Msk) != RCC_CR_HSERDY);
+	//Enable HSI
+	RCC->CR |= ((uint32_t)RCC_CR_HSION);
+	while ((RCC->CR & RCC_CR_HSIRDY_Msk) != RCC_CR_HSIRDY);
 
-		//Configure the main PLL
-		RCC->PLLCFGR = (RCC_PLLCFGR_PLLSRC_HSE) |
-						(pll_m << RCC_PLLCFGR_PLLM_Pos) |
-						(pll_n << RCC_PLLCFGR_PLLN_Pos) |
-						(((pll_p >> 1u) - 1u) << RCC_PLLCFGR_PLLP_Pos) |
-						(pll_q << RCC_PLLCFGR_PLLQ_Pos);
+	//Configure the main PLL
+	RCC->PLLCFGR = (RCC_PLLCFGR_PLLSRC_HSI) |
+					(pll_m << RCC_PLLCFGR_PLLM_Pos) |
+					(pll_n << RCC_PLLCFGR_PLLN_Pos) |
+					(((pll_p >> 1u) - 1u) << RCC_PLLCFGR_PLLP_Pos) |
+					(pll_q << RCC_PLLCFGR_PLLQ_Pos);
 
-		//Enable the main PLL
-		RCC->CR |= RCC_CR_PLLON;
+	//Enable the main PLL
+	RCC->CR |= RCC_CR_PLLON;
 
-		//Wait till the main PLL is ready
-		while((RCC->CR & RCC_CR_PLLRDY) == 0) {}
+	//Wait till the main PLL is ready
+	while((RCC->CR & RCC_CR_PLLRDY) == 0) {}
 
-		//Configure Flash prefetch, Instruction cache, Data cache and wait state
-		FLASH->ACR = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN |FLASH_ACR_DCEN |FLASH_ACR_LATENCY_5WS;
+	//Configure Flash prefetch, Instruction cache, Data cache and wait state
+	FLASH->ACR = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN |FLASH_ACR_DCEN |FLASH_ACR_LATENCY_5WS;
 
-		//HCLK = SYSCLK / 1
-		RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
+	//HCLK = SYSCLK / 1
+	RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
 
-		//PCLK1 = HCLK / 4
-		RCC->CFGR |= RCC_CFGR_PPRE1_DIV4;
+	//PCLK1 = HCLK / 4
+	RCC->CFGR |= RCC_CFGR_PPRE1_DIV4;
 
-		//PCLK2 = HCLK / 2
-		RCC->CFGR |= RCC_CFGR_PPRE2_DIV2;
+	//PCLK2 = HCLK / 2
+	RCC->CFGR |= RCC_CFGR_PPRE2_DIV2;
 
-		//Select the main PLL as system clock source
-		RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
-		RCC->CFGR |= RCC_CFGR_SW_PLL;
+	//Select the main PLL as system clock source
+	RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
+	RCC->CFGR |= RCC_CFGR_SW_PLL;
 
-		//Wait till the main PLL is used as system clock source
-		while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL) {}
+	//Wait till the main PLL is used as system clock source
+	while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL) {}
 
-		//Update the SystemCoreClock variable
-		SystemCoreClockUpdate();
+	//Update the SystemCoreClock variable
+	SystemCoreClockUpdate();
 
-		//Update the cyclesInMicro variable
-		cyclesInMicro = SystemCoreClock / microsInSec;
-	}
-
-
-	/// @brief Get system clock count
-	uint32_t GetSysClkCounts()
-	{
-		return sysTicks;
-	}
+	//Update the cyclesInMicro variable
+	cyclesInMicro = SystemCoreClock / microsInSec;
+}
 
 
-	/// @brief System clock counter
-	void SysTickCounter()
-	{
-		sysTicks++;
-	}
+/// @brief Configures the system to use an hse crystal as clock source.
+/// @brief XTAL：8Mhz, PLL: 168Mhz, System Clock = PLL1, PCLK1 = 42Mhz, PCLK2=84Mhz.
+void ConcreteSystem::ConfigureForXtal()
+{
+	const uint32_t pll_m = 4;
+	const uint32_t pll_n = 168;
+	const uint32_t pll_p = 2;
+	const uint32_t pll_q = 7;
+
+	//Enable HSE
+	RCC->CR |= ((uint32_t)RCC_CR_HSEON);
+	while ((RCC->CR & RCC_CR_HSERDY_Msk) != RCC_CR_HSERDY);
+
+	//Configure the main PLL
+	RCC->PLLCFGR = (RCC_PLLCFGR_PLLSRC_HSE) |
+					(pll_m << RCC_PLLCFGR_PLLM_Pos) |
+					(pll_n << RCC_PLLCFGR_PLLN_Pos) |
+					(((pll_p >> 1u) - 1u) << RCC_PLLCFGR_PLLP_Pos) |
+					(pll_q << RCC_PLLCFGR_PLLQ_Pos);
+
+	//Enable the main PLL
+	RCC->CR |= RCC_CR_PLLON;
+
+	//Wait till the main PLL is ready
+	while((RCC->CR & RCC_CR_PLLRDY) == 0) {}
+
+	//Configure Flash prefetch, Instruction cache, Data cache and wait state
+	FLASH->ACR = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN |FLASH_ACR_DCEN |FLASH_ACR_LATENCY_5WS;
+
+	//HCLK = SYSCLK / 1
+	RCC->CFGR |= RCC_CFGR_HPRE_DIV1;
+
+	//PCLK1 = HCLK / 4
+	RCC->CFGR |= RCC_CFGR_PPRE1_DIV4;
+
+	//PCLK2 = HCLK / 2
+	RCC->CFGR |= RCC_CFGR_PPRE2_DIV2;
+
+	//Select the main PLL as system clock source
+	RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
+	RCC->CFGR |= RCC_CFGR_SW_PLL;
+
+	//Wait till the main PLL is used as system clock source
+	while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL) {}
+
+	//Update the SystemCoreClock variable
+	SystemCoreClockUpdate();
+
+	//Update the cyclesInMicro variable
+	cyclesInMicro = SystemCoreClock / microsInSec;
+}
 
 
-	/// @brief Delays for a specified number of microseconds.
-	void DelayUs(uint32_t micros)
-	{
-		uint32_t delayStart = DWT->CYCCNT;
-		uint32_t delayCycles = (micros * cyclesInMicro);
-		while ((DWT->CYCCNT - delayStart) < delayCycles);
-	}
+/// @brief Get system clock count
+uint32_t ConcreteSystem::GetSysClkCounts()
+{
+	return sysTicks;
+}
 
 
-	/// @brief Delays for a specified number of milliseconds.
-	void DelayMs(uint32_t millis)
-	{
-		DelayUs(1000 * millis);
-	}
+/// @brief System clock counter
+void ConcreteSystem::SysTickCounter()
+{
+	sysTicks++;
+}
 
 
-	/// @brief Enables IRQ interrupts by clearing the I-bit in the CPSR.
-	void EnableIRQ()
-	{
-		__enable_irq();
-	}
+/// @brief Delays for a specified number of microseconds.
+void ConcreteSystem::DelayUs(uint32_t micros)
+{
+	uint32_t delayStart = DWT->CYCCNT;
+	uint32_t delayCycles = (micros * cyclesInMicro);
+	while ((DWT->CYCCNT - delayStart) < delayCycles);
+}
 
 
-	/// @brief Disables IRQ interrupts by setting the I - bit in the CPSR.
-	void DisableIRQ()
-	{
-		__disable_irq();
-	}
+/// @brief Delays for a specified number of milliseconds.
+void ConcreteSystem::DelayMs(uint32_t millis)
+{
+	DelayUs(1000 * millis);
+}
 
 
-	/// @brief Reset STM32 core and peripherals
-	void Reboot()
-	{
-		__set_FAULTMASK(1);
-		NVIC_SystemReset();
-	}
-};
+/// @brief Enables IRQ interrupts by clearing the I-bit in the CPSR.
+void ConcreteSystem::EnableIRQ()
+{
+	__enable_irq();
+}
 
 
-///Register component
-REGISTER_COMPONENT(ConcreteSystem, ComponentID::_system, system);
+/// @brief Disables IRQ interrupts by setting the I - bit in the CPSR.
+void ConcreteSystem::DisableIRQ()
+{
+	__disable_irq();
+}
 
+
+/// @brief Reset STM32 core and peripherals
+void ConcreteSystem::Reboot()
+{
+	__set_FAULTMASK(1);
+	NVIC_SystemReset();
+}
 
 
 /// @brief SysTick handler

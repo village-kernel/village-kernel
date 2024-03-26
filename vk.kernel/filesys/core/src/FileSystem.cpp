@@ -65,7 +65,7 @@ public:
 				return;
 			}
 		}
-		kernel->debug->Output(Debug::_Lv2, "Mount system node failed, '/media/VILLAGE OS' not found");
+		kernel->debug.Output(Debug::_Lv2, "Mount system node failed, '/media/VILLAGE OS' not found");
 	}
 
 
@@ -127,5 +127,5 @@ public:
 };
 
 
-///Register component
-REGISTER_COMPONENT(ConcreteFileSystem, ComponentID::_fileSystem, fileSystem);
+///Register module
+REGISTER_MODULE(new ConcreteFileSystem(), ModuleID::_feature, fileSystem);

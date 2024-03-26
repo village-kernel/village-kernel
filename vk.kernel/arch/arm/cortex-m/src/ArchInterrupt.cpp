@@ -6,7 +6,6 @@
 //###########################################################################
 #include "ArchInterrupt.h"
 #include "HalHeaders.h"
-#include "Kernel.h"
 
 
 /// @brief Declarations
@@ -14,61 +13,53 @@ extern "C" void Stub_Handler();
 extern "C" void Default_Handler();
 
 
-/// @brief ConcreteArchInterrupt
-class ConcreteArchInterrupt : public ArchInterrupt
+/// @brief Interrupt Setup
+void ArchInterrupt::Setup()
 {
-public:
-	/// @brief System config vector table, this value must be a multiple of 0x200.
-	void ConfigVectorTable(uint32_t vector)
+	//Symbol defined in the linker script
+	extern void *_sivector, *_svector, *_evector;
+
+	//Copy isr vector from sivector
+	void **pSource = &_sivector, **pDest = &_svector;
+	for (; pDest != &_evector; pSource++, pDest++)
+		*pDest = *pSource;
+
+	//Calculate the size of isr vector
+	uint32_t isrSizes = ((uint32_t)&_evector - (uint32_t)&_svector) >> 2;
+	isrSizes = isrSizes - rsvd_isr_size;
+
+	//Calculate the address of usr isr vectors
+	uint32_t* vectors = (uint32_t*)&_svector + rsvd_isr_size;
+
+	//Set the new isr handler
+	for (uint32_t i = 0; i < isrSizes; i++)
 	{
-		SCB->VTOR = vector;
-	}
-public:
-	/// @brief Interrupt Setup
-	void Setup()
-	{
-		//Symbol defined in the linker script
-		extern void *_sivector, *_svector, *_evector;
-
-		//Copy isr vector from sivector
-		void **pSource = &_sivector, **pDest = &_svector;
-		for (; pDest != &_evector; pSource++, pDest++)
-			*pDest = *pSource;
-
-		//Calculate the size of isr vector
-		uint32_t isrSizes = ((uint32_t)&_evector - (uint32_t)&_svector) >> 2;
-		isrSizes = isrSizes - rsvd_isr_size;
-
-		//Calculate the address of usr isr vectors
-		uint32_t* vectors = (uint32_t*)&_svector + rsvd_isr_size;
-
-		//Set the new isr handler
-		for (uint32_t i = 0; i < isrSizes; i++)
+		//Change the origin handler into isr table
+		if (vectors[i] != (uint32_t)&(Default_Handler) + 1)
 		{
-			//Change the origin handler into isr table
-			if (vectors[i] != (uint32_t)&(Default_Handler) + 1)
-			{
-				kernel->interrupt->SetISR(i, (Function)vectors[i], NULL, NULL);
-			}
-
-			vectors[i] = (uint32_t)&Stub_Handler;
+			kernel->interrupt.SetISR(i, (Function)vectors[i], NULL, NULL);
 		}
 
-		//Relocation isr vecotr table
-		ConfigVectorTable((uint32_t)&_svector);
+		vectors[i] = (uint32_t)&Stub_Handler;
 	}
 
-
-	/// @brief Exit
-	void Exit()
-	{
-
-	}
-};
+	//Relocation isr vecotr table
+	ConfigVectorTable((uint32_t)&_svector);
+}
 
 
-///Register component
-REGISTER_COMPONENT(ConcreteArchInterrupt, ComponentID::_archInterrupt, archInterrupt);
+/// @brief Exit
+void ArchInterrupt::Exit()
+{
+
+}
+
+
+/// @brief System config vector table, this value must be a multiple of 0x200.
+void ArchInterrupt::ConfigVectorTable(uint32_t vector)
+{
+	SCB->VTOR = vector;
+}
 
 
 /// @brief Stub handler
@@ -83,7 +74,7 @@ extern "C"  __attribute__ ((naked)) void Stub_Handler()
 	__asm volatile("mrs %0, ipsr" : "=r"(irq));
 
 	//Go to interrupt handler
-	kernel->interrupt->Handler(irq - ArchInterrupt::rsvd_isr_size);
+	kernel->interrupt.Handler(irq - ArchInterrupt::rsvd_isr_size);
 
 	//Exit
 	__asm volatile("pop {lr}");

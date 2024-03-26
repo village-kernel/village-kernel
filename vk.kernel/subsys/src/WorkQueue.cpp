@@ -15,7 +15,7 @@ class ConcreteWorkQueue : public WorkQueue
 {
 private:
 	//Members
-	Thread*     thread;
+	Thread*  thread;
 	List<Work*> works;
 private:
 	/// @brief WorkQueue execute
@@ -47,7 +47,7 @@ public:
 	void Setup()
 	{
 		//Gets the thread pointer
-		thread = (Thread*)kernel->feature->GetComponent(ComponentID::_thread);
+		thread = (Thread*)&kernel->thread;
 
 		//Create work queue task
 		thread->CreateTask(this->GetName(), (Method)&ConcreteWorkQueue::Execute, this);
@@ -115,5 +115,5 @@ public:
 };
 
 
-///Register component
-REGISTER_COMPONENT(ConcreteWorkQueue, ComponentID::_workQueue, workQueue);
+///Register module
+REGISTER_MODULE(new ConcreteWorkQueue(), ModuleID::_feature, workQueue);

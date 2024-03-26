@@ -7,23 +7,27 @@
 #ifndef __SCHEDULER_H__
 #define __SCHEDULER_H__
 
-#include "Component.h"
+#include "Kernel.h"
 
 
-/// @brief Scheduler
-class Scheduler : public Component
+/// @brief ConcreteScheduler
+class ConcreteScheduler : public Scheduler, public Class
 {
-public:
-	//Enumerations
-	enum Access
-	{
-		Unprivileged = 0,
-		Privileged = 1,
-	};
+private:
+	//Members
+	bool isStartSchedule;
+
+	//Methods
+	void PendSVHandler();
+	void SysTickHandler();
 public:
 	//Methods
-	virtual void Start() = 0;
-	virtual void Sched(Access access) = 0;
+	ConcreteScheduler();
+	~ConcreteScheduler();
+	void Setup();
+	void Exit();
+	void Start();
+	void Sched(Access access);
 };
 
 #endif // !__SCHEDULER_H__

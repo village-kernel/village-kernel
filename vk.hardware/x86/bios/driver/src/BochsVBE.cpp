@@ -259,4 +259,4 @@ public:
 
 
 ///Register driver
-REGISTER_DRIVER(BochsVBEDrv, DriverID::_display, display0);
+REGISTER_DRIVER(new BochsVBEDrv(), DriverID::_miscellaneous, display0);

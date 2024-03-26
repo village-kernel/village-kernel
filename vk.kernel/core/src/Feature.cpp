@@ -1,120 +1,97 @@
 //###########################################################################
 // Feature.cpp
-// Definitions of the functions that manage component object
+// Definitions of the functions that manage module object
 //
 // $Copyright: Copyright (C) village
 //###########################################################################
 #include "Feature.h"
-#include "Kernel.h"
-#include "List.h"
 
 
-/// @brief ConcreteFeature
-class ConcreteFeature : public Feature
+/// @brief Constructor
+ConcreteFeature::ConcreteFeature()
+	:isRuntime(false)
 {
-private:
-	//Members
-	bool isRuntime;
-	List<Component*> components;
-private:
-	/// @brief Register in runtime
-	/// @param component 
-	void RegisterInRuntime(Component* component)
+}
+
+
+/// @brief Destructor
+ConcreteFeature::~ConcreteFeature()
+{
+}
+
+
+/// @brief Execute module object->Setup
+void ConcreteFeature::Setup()
+{
+	isRuntime = false;
+	
+	for (int id = 0; id < _dirverIdSize; id++)
 	{
-		if (isRuntime) component->Setup();
-	}
-
-
-	/// @brief Deregister in runtime
-	/// @param component 
-	void DeregisterInRuntime(Component* component)
-	{
-		if (isRuntime) component->Exit();
-	}
-public:
-	/// @brief Constructor
-	ConcreteFeature()
-		:isRuntime(false)
-	{
-	}
-
-
-	/// @brief Destructor
-	~ConcreteFeature()
-	{
-	}
-
-
-	/// @brief Execute component object->Setup
-	void Setup()
-	{
-		isRuntime = false;
-		
-		for (components.Begin(); !components.IsEnd(); components.Next())
+		for (modules.Begin(); !modules.IsEnd(); modules.Next())
 		{
-			Component* component = components.Item();
+			Module* module = modules.Item();
 
-			if (ComponentID::_feature != component->GetID())
-			{
-				component->Setup();
-			}
-		}
-
-		isRuntime = true;
-	}
-
-
-	/// @brief Execute component object->Exit
-	void Exit()
-	{
-		for (components.Begin(); !components.IsEnd(); components.Next())
-		{
-			Component* component = components.Item();
-
-			if (ComponentID::_feature != component->GetID())
-			{
-				component->Exit();
-			}
+			if (module->GetID() == id) module->Setup();
 		}
 	}
 
+	isRuntime = true;
+}
 
-	/// @brief Register component object
-	/// @param component component pointer
-	void RegisterComponent(Component* component)
+
+/// @brief Execute module object->Exit
+void ConcreteFeature::Exit()
+{
+	for (int id = _dirverIdSize - 1; id >= 0; id--)
 	{
-		components.Insert(component, component->GetID(), component->GetName());
-		RegisterInRuntime(component);
+		for (modules.End(); !modules.IsBegin(); modules.Prev())
+		{
+			Module* module = modules.Item();
+
+			if (module->GetID() == id) module->Exit();
+		}
 	}
+}
 
 
-	/// @brief Deregister component object
-	/// @param component component pointer
-	void DeregisterComponent(Component* component)
-	{
-		DeregisterInRuntime(component);
-		components.Remove(component);
-	}
+/// @brief Register in runtime
+/// @param module 
+void ConcreteFeature::RegisterInRuntime(Module* module)
+{
+	if (isRuntime) module->Setup();
+}
 
 
-	/// @brief Get the component object
-	/// @param id component id
-	/// @return component
-	Component* GetComponent(uint32_t id)
-	{
-		return components.GetItem(id);
-	}
+/// @brief Register module object
+/// @param module module pointer
+void ConcreteFeature::RegisterModule(Module* module)
+{
+	modules.Add(module, module->GetName());
+	RegisterInRuntime(module);
+}
 
 
-	/// @brief Get the component object by name
-	/// @param name component name
-	/// @return driver
-	Component* GetComponent(const char* name)
-	{
-		return components.GetItemByName(name);
-	}
-}; 
+/// @brief Deregister in runtime
+/// @param module 
+void ConcreteFeature::DeregisterInRuntime(Module* module)
+{
+	if (isRuntime) module->Exit();
+}
 
 
-///Register component
-REGISTER_COMPONENT(ConcreteFeature, ComponentID::_feature, feature);
+/// @brief Deregister module object
+/// @param module module pointer
+void ConcreteFeature::DeregisterModule(Module* module)
+{
+	DeregisterInRuntime(module);
+	modules.Remove(module);
+}
+
+
+/// @brief Get the module object by name
+/// @param name module name
+/// @return module
+Module* ConcreteFeature::GetModule(const char* name)
+{
+	return modules.GetItemByName(name);
+}

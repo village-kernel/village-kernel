@@ -7,19 +7,26 @@
 #ifndef __DEVICE_H__
 #define __DEVICE_H__
 
-#include "Component.h"
+#include "Kernel.h"
 #include "Driver.h"
+#include "List.h"
 
 
-/// @brief Devic
-class Device : public Component
+/// @brief ConcreteDevice
+class ConcreteDevice : public Device
 {
+private:
+	//Members
+	List<Driver*> drivers;
 public:
 	//Methods
-	virtual void RegisterDriver(Driver* driver) = 0;
-	virtual void DeregisterDriver(Driver* driver) = 0;
-	virtual Driver* GetDriver(uint32_t id) = 0;
-	virtual Driver* GetDriver(const char* name) = 0;
+	ConcreteDevice();
+	~ConcreteDevice();
+	void Setup();
+	void Exit();
+	void RegisterDriver(Driver* driver);
+	void DeregisterDriver(Driver* driver);
+	Driver* GetDriver(const char* name);
 };
 
 #endif // !__DEVICE_H__

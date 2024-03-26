@@ -86,6 +86,11 @@ config DIRSTREAM
 	bool "Enable dirstream function"
 	default n
 
+config DRVSTREAM
+	depends on FILEUTILS
+	bool "Enable drvstream function"
+	default n
+
 config FILESTREAM
 	depends on FILEUTILS
 	bool "Enable filestream function"

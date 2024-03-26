@@ -7,11 +7,11 @@
 #ifndef __INPUT_H__
 #define __INPUT_H__
 
-#include "Component.h"
+#include "Module.h"
 
 
 /// @brief Input
-class Input : public Component
+class Input : public Module
 {
 public:
 	//Input type
